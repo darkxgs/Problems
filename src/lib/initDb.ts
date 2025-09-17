@@ -166,31 +166,7 @@ export async function initializeDatabase() {
 
 
 
-    // Insert some sample engineers (optional - can be removed for production)
-    const engineersExist = await sql`SELECT id FROM engineers LIMIT 1`;
-    if (engineersExist.length === 0) {
-      await sql`
-        INSERT INTO engineers (name, specialization) VALUES
-        ('محمد الأحمد', 'مكيفات هواء'),
-        ('عبدالله الخالد', 'أجهزة التبريد'),
-        ('سعد المطيري', 'أجهزة الغسيل'),
-        ('ناصر العلي', 'صيانة عامة')
-      `;
-    }
-
-    // Insert some sample spare parts
-    const sparePartsExist = await sql`SELECT id FROM spare_parts LIMIT 1`;
-    if (sparePartsExist.length === 0) {
-      await sql`
-        INSERT INTO spare_parts (name, warehouse, quantity, code) VALUES
-        ('فلتر هواء', 'مخزن الرياض الرئيسي', 25, 'AF-001'),
-        ('ضاغط تبريد', 'مخزن الرياض الرئيسي', 8, 'COM-002'),
-        ('مروحة داخلية', 'مخزن جدة', 15, 'IF-003'),
-        ('لوحة تحكم إلكترونية', 'مخزن الدمام', 12, 'ECB-004'),
-        ('خرطوم صرف', 'مخزن الرياض الرئيسي', 30, 'DH-005'),
-        ('محرك مروحة', 'مخزن جدة', 6, 'FM-006')
-      `;
-    }
+    // Sample data insertion removed - engineers and spare parts should be managed through the UI only
 
     console.log('Database initialized successfully');
   } catch (error) {
