@@ -16,16 +16,18 @@ import { User as UserType } from '../types';
 
 interface SettingsPageProps {
   currentUser: UserType;
+  systemSettings: Record<string, any>;
   onUpdateUser: (user: UserType) => void;
+  onUpdateSettings: (key: string, value: any) => void;
 }
 
-const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }) => {
+const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, systemSettings, onUpdateUser, onUpdateSettings }) => {
   const [activeTab, setActiveTab] = useState('profile');
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     name: currentUser.name,
-    email: 'admin@company.com',
-    phone: '+966501234567',
+    email: currentUser.email || '',
+    phone: currentUser.phone || '',
     currentPassword: '',
     newPassword: '',
     confirmPassword: ''
@@ -40,13 +42,13 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
     weeklyReports: false
   });
 
-  const [systemSettings, setSystemSettings] = useState({
-    autoAssignEngineers: true,
-    requireApproval: false,
-    enableBackup: true,
-    maintenanceMode: false,
-    sessionTimeout: 30,
-    maxFileSize: 10
+  const [localSystemSettings, setLocalSystemSettings] = useState({
+    autoAssignEngineers: systemSettings.auto_assign_engineers || true,
+    requireApproval: systemSettings.require_approval || false,
+    enableBackup: systemSettings.enable_backup || true,
+    maintenanceMode: systemSettings.maintenance_mode || false,
+    sessionTimeout: systemSettings.session_timeout || 30,
+    maxFileSize: systemSettings.max_file_size || 10
   });
 
   const tabs = [
@@ -58,12 +60,16 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
   ];
 
   const handleSaveProfile = () => {
-    const updatedUser = {
-      ...currentUser,
-      name: formData.name
-    };
-    onUpdateUser(updatedUser);
-    alert('تم حفظ البيانات بنجاح');
+    if (window.confirm('هل تريد حفظ تغييرات الملف الشخصي؟')) {
+      const updatedUser = {
+        ...currentUser,
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone
+      };
+      onUpdateUser(updatedUser);
+      alert('تم حفظ البيانات بنجاح');
+    }
   };
 
   const handleSaveNotifications = () => {
@@ -71,7 +77,14 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
   };
 
   const handleSaveSystem = () => {
-    alert('تم حفظ إعدادات النظام بنجاح');
+    if (window.confirm('هل تريد حفظ إعدادات النظام؟ قد تؤثر هذه التغييرات على جميع المستخدمين.')) {
+      // Save each setting
+      Object.entries(localSystemSettings).forEach(([key, value]) => {
+        const settingKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+        onUpdateSettings(settingKey, value);
+      });
+      alert('تم حفظ إعدادات النظام بنجاح');
+    }
   };
 
   const handleChangePassword = () => {
@@ -373,8 +386,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={systemSettings.autoAssignEngineers}
-                        onChange={(e) => setSystemSettings(prev => ({ ...prev, autoAssignEngineers: e.target.checked }))}
+                        checked={localSystemSettings.autoAssignEngineers}
+                        onChange={(e) => setLocalSystemSettings(prev => ({ ...prev, autoAssignEngineers: e.target.checked }))}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -389,8 +402,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
                         type="checkbox"
-                        checked={systemSettings.enableBackup}
-                        onChange={(e) => setSystemSettings(prev => ({ ...prev, enableBackup: e.target.checked }))}
+                        checked={localSystemSettings.enableBackup}
+                        onChange={(e) => setLocalSystemSettings(prev => ({ ...prev, enableBackup: e.target.checked }))}
                         className="sr-only peer"
                       />
                       <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
@@ -405,8 +418,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
                       </div>
                     </div>
                     <select
-                      value={systemSettings.sessionTimeout}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, sessionTimeout: parseInt(e.target.value) }))}
+                      value={localSystemSettings.sessionTimeout}
+                      onChange={(e) => setLocalSystemSettings(prev => ({ ...prev, sessionTimeout: parseInt(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value={15}>15 دقيقة</option>
@@ -424,8 +437,8 @@ const SettingsPage: React.FC<SettingsPageProps> = ({ currentUser, onUpdateUser }
                       </div>
                     </div>
                     <select
-                      value={systemSettings.maxFileSize}
-                      onChange={(e) => setSystemSettings(prev => ({ ...prev, maxFileSize: parseInt(e.target.value) }))}
+                      value={localSystemSettings.maxFileSize}
+                      onChange={(e) => setLocalSystemSettings(prev => ({ ...prev, maxFileSize: parseInt(e.target.value) }))}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     >
                       <option value={5}>5 ميجابايت</option>

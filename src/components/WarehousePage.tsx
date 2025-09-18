@@ -15,6 +15,7 @@ import { SparePart } from '../types';
 
 interface WarehousePageProps {
     spareParts: SparePart[];
+    lowStockThreshold: number;
     onAddSparePart: (sparePart: Omit<SparePart, 'id'>) => void;
     onUpdateSparePart: (id: string, sparePart: Omit<SparePart, 'id'>) => void;
     onDeleteSparePart: (id: string) => void;
@@ -23,6 +24,7 @@ interface WarehousePageProps {
 
 const WarehousePage: React.FC<WarehousePageProps> = ({
     spareParts,
+    lowStockThreshold,
     onAddSparePart,
     onUpdateSparePart,
     onDeleteSparePart,
@@ -49,7 +51,7 @@ const WarehousePage: React.FC<WarehousePageProps> = ({
         return matchesSearch && matchesWarehouse;
     });
 
-    const lowStockParts = spareParts.filter(part => part.quantity < 10);
+    const lowStockParts = spareParts.filter(part => part.quantity < lowStockThreshold);
     const totalParts = spareParts.reduce((sum, part) => sum + part.quantity, 0);
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -345,11 +347,11 @@ const WarehousePage: React.FC<WarehousePageProps> = ({
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${part.quantity === 0 ? 'bg-red-100 text-red-800' :
-                                                        part.quantity < 10 ? 'bg-yellow-100 text-yellow-800' :
+                                                        part.quantity < lowStockThreshold ? 'bg-yellow-100 text-yellow-800' :
                                                             'bg-green-100 text-green-800'
                                                     }`}>
                                                     {part.quantity === 0 ? 'نفد المخزون' :
-                                                        part.quantity < 10 ? 'مخزون منخفض' : 'متوفر'}
+                                                        part.quantity < lowStockThreshold ? 'مخزون منخفض' : 'متوفر'}
                                                 </span>
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">

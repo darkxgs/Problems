@@ -17,9 +17,11 @@ interface ReportsPageProps {
   complaints: Complaint[];
   customers: Customer[];
   spareParts: SparePart[];
+  statistics: Record<string, number>;
+  systemSettings: Record<string, any>;
 }
 
-const ReportsPage: React.FC<ReportsPageProps> = ({ complaints, customers, spareParts }) => {
+const ReportsPage: React.FC<ReportsPageProps> = ({ complaints, customers, spareParts, statistics, systemSettings }) => {
   const [dateRange, setDateRange] = useState('month');
   const [reportType, setReportType] = useState('complaints');
 
@@ -108,8 +110,10 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ complaints, customers, spareP
             </div>
           </div>
           <div className="mt-4 flex items-center text-sm">
-            <TrendingUp className="h-4 w-4 text-green-500 ml-1" />
-            <span className="text-green-600">+8% من الشهر الماضي</span>
+            <TrendingUp className={`h-4 w-4 ml-1 ${statistics.monthlyGrowth >= 0 ? 'text-green-500' : 'text-red-500'}`} />
+            <span className={statistics.monthlyGrowth >= 0 ? 'text-green-600' : 'text-red-600'}>
+              {statistics.monthlyGrowth >= 0 ? '+' : ''}{statistics.monthlyGrowth || 0}% من الشهر الماضي
+            </span>
           </div>
         </div>
 
@@ -132,7 +136,7 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ complaints, customers, spareP
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">متوسط وقت الحل</p>
-              <p className="text-3xl font-bold text-yellow-600">2.5</p>
+              <p className="text-3xl font-bold text-yellow-600">{statistics.avgResolutionDays || 0}</p>
             </div>
             <div className="p-3 bg-yellow-100 rounded-full">
               <Clock className="h-6 w-6 text-yellow-600" />
@@ -147,7 +151,7 @@ const ReportsPage: React.FC<ReportsPageProps> = ({ complaints, customers, spareP
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">رضا العملاء</p>
-              <p className="text-3xl font-bold text-purple-600">4.2</p>
+              <p className="text-3xl font-bold text-purple-600">{statistics.customerSatisfaction || 0}</p>
             </div>
             <div className="p-3 bg-purple-100 rounded-full">
               <Users className="h-6 w-6 text-purple-600" />

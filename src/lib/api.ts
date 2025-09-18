@@ -476,9 +476,25 @@ export const statisticsApi = {
 
     const avgResolutionDays = resolutionTimes[0]?.avg_days || 0;
 
+    // Calculate customer satisfaction
+    const closedComplaints = await sql`
+      SELECT COUNT(*) as count FROM complaints WHERE status = 'closed'
+    `;
+    const totalComplaints = await sql`
+      SELECT COUNT(*) as count FROM complaints
+    `;
+    
+    const closedCount = closedComplaints[0]?.count || 0;
+    const totalCount = totalComplaints[0]?.count || 1;
+    const completionRate = (closedCount / totalCount) * 100;
+    
+    // Simple satisfaction calculation based on completion rate
+    const satisfaction = Math.min(5, Math.max(1, (completionRate / 100) * 5));
+
     return {
       monthlyGrowth: Math.round(monthlyGrowth * 100) / 100,
-      avgResolutionDays: Math.round(avgResolutionDays * 10) / 10
+      avgResolutionDays: Math.round(avgResolutionDays * 10) / 10,
+      customerSatisfaction: Math.round(satisfaction * 10) / 10
     };
   },
 

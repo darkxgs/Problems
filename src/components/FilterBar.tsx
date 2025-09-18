@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Filter, Search } from 'lucide-react';
 import { ComplaintStatus } from '../types';
 
@@ -16,50 +17,74 @@ const FilterBar: React.FC<FilterBarProps> = ({
   onSearchChange
 }) => {
   const statusOptions = [
-    { value: 'all' as const, label: 'جميع الشكاوى', color: 'text-gray-600' },
-    { value: 'open' as const, label: 'مفتوحة', color: 'text-red-600' },
-    { value: 'under_investigation' as const, label: 'قيد التحقيق', color: 'text-yellow-600' },
-    { value: 'closed' as const, label: 'مغلقة (تم الإصلاح)', color: 'text-green-600' }
+    { value: 'all' as const, label: 'جميع الشكاوى', icon: '📋', bgColor: 'bg-gray-500/20' },
+    { value: 'open' as const, label: 'مفتوحة', icon: '🔴', bgColor: 'bg-red-500/20' },
+    { value: 'under_investigation' as const, label: 'قيد التحقيق', icon: '🟡', bgColor: 'bg-yellow-500/20' },
+    { value: 'closed' as const, label: 'مغلقة', icon: '🟢', bgColor: 'bg-green-500/20' }
   ];
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-      <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+    <motion.div 
+      className="glass-card rounded-2xl p-6 mb-6 shadow-medium"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between">
         {/* Search */}
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+        <motion.div 
+          className="search-container flex-1 max-w-md"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <Search className="search-icon h-5 w-5" />
           <input
             type="text"
-            placeholder="البحث في الشكاوى..."
+            placeholder="🔍 البحث في الشكاوى (رقم الشكوى، اسم العميل، الوصف...)"
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="w-full pr-10 pl-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="search-input w-full py-3 px-4 rounded-xl text-white placeholder-white/60 focus:outline-none transition-all duration-300"
           />
-        </div>
+        </motion.div>
 
         {/* Status Filter */}
-        <div className="flex items-center space-x-reverse space-x-2">
-          <Filter className="h-5 w-5 text-gray-400" />
-          <div className="flex space-x-reverse space-x-2">
-            {statusOptions.map((option) => (
-              <button
+        <motion.div 
+          className="flex items-center gap-4"
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="flex items-center gap-2 text-white/80">
+            <Filter className="h-5 w-5" />
+            <span className="font-medium">تصفية:</span>
+          </div>
+          <div className="flex gap-2 flex-wrap">
+            {statusOptions.map((option, index) => (
+              <motion.button
                 key={option.value}
                 onClick={() => onStatusFilterChange(option.value)}
                 className={`
-                  px-4 py-2 rounded-lg text-sm font-medium transition-colors duration-200
+                  filter-button px-4 py-2 rounded-xl text-sm font-medium flex items-center gap-2
                   ${statusFilter === option.value
-                    ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200 border-2 border-transparent'
+                    ? 'active text-white shadow-lg'
+                    : 'bg-white/10 text-white/80 hover:bg-white/20 hover:text-white border border-white/20'
                   }
                 `}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
               >
+                <span className="text-base">{option.icon}</span>
                 {option.label}
-              </button>
+              </motion.button>
             ))}
           </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

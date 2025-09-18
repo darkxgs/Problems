@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -101,8 +102,10 @@ function App() {
     try {
       const newCustomer = await customerApi.create(customer);
       setCustomers(prev => [...prev, newCustomer]);
+      alert('تم إضافة العميل بنجاح');
     } catch (error) {
       console.error('Error adding customer:', error);
+      alert('حدث خطأ أثناء إضافة العميل. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -110,8 +113,10 @@ function App() {
     try {
       const updatedCustomer = await customerApi.update(id, customer);
       setCustomers(prev => prev.map(c => c.id === id ? updatedCustomer : c));
+      alert('تم تحديث بيانات العميل بنجاح');
     } catch (error) {
       console.error('Error updating customer:', error);
+      alert('حدث خطأ أثناء تحديث بيانات العميل. يرجى المحاولة مرة أخرى.');
     }
   };
 
@@ -293,18 +298,61 @@ function App() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center" dir="rtl">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">جاري تحميل البيانات...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center" dir="rtl">
+        <motion.div 
+          className="text-center glass rounded-3xl p-12"
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <motion.div 
+            className="w-20 h-20 border-4 border-white border-t-transparent rounded-full mx-auto mb-6"
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          />
+          <motion.p 
+            className="text-white text-xl font-medium"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.3 }}
+          >
+            جاري تحميل البيانات...
+          </motion.p>
+        </motion.div>
       </div>
     );
   }
 
+  // Page transition variants
+  const pageVariants = {
+    initial: { opacity: 0, x: 50 },
+    in: { opacity: 1, x: 0 },
+    out: { opacity: 0, x: -50 }
+  };
+
+  const pageTransition = {
+    type: "tween",
+    ease: "anticipate",
+    duration: 0.5
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50" dir="rtl">
-      <Header onMenuToggle={() => setSidebarOpen(!sidebarOpen)} currentUser={currentUser!} />
+    <motion.div 
+      className="min-h-screen" 
+      dir="rtl"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <Header 
+        onMenuToggle={() => setSidebarOpen(!sidebarOpen)} 
+        currentUser={currentUser!}
+        onSettingsClick={() => setCurrentPage('settings')}
+        onNotificationsClick={() => {
+          // Future: Show notifications dropdown
+          alert('الإشعارات - سيتم تطوير هذه الميزة قريباً');
+        }}
+      />
       
       <div className="flex">
         <Sidebar 
@@ -314,7 +362,16 @@ function App() {
           onPageChange={setCurrentPage}
         />
         
-        <main className="flex-1 p-6">
+        <main className="flex-1 p-6 overflow-hidden">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPage}
+              initial="initial"
+              animate="in"
+              exit="out"
+              variants={pageVariants}
+              transition={pageTransition}
+            >
           {currentPage === 'dashboard' && (
             <Dashboard 
               complaints={complaints}
@@ -466,6 +523,8 @@ function App() {
               onUpdateSettings={handleUpdateSettings}
             />
           )}
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         {/* Repair Modal */}
@@ -476,7 +535,7 @@ function App() {
           availableSpareParts={spareParts}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }
 
